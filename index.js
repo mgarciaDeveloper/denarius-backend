@@ -1,4 +1,4 @@
-
+/* 
 // ---- Requires
 require("dotenv").config();
 const express = require("express");
@@ -69,36 +69,52 @@ app.use(passport.session());
 app.use(flash()); // ...
 
 // collections imports
+var Seminar = require("./models/Seminars")
 var User = require("./models/Users");
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 // ---- Cadastro de Maanains
-if (false) {
-    User.register({
-        username: 'x.x',
-        name: 'Maanaim POA/RS',
-        cnpj: '27.056.910/2398-70',
-        phone: 5191853463,
-        description: 'Maanaim fundado em 2016, estamos no coração do estado do Rio Grande do Sul, onde a Obra avança com firmeza nas promessas de Deus  ',
-        verse: 'Daquele dia em diante, enquanto a metade dos meus homens fazia o trabalho, a outra metade permanecia armada de lanças, escudos, arcos e couraças. Os oficiais davam apoio a todo o povo de Judá que estava construindo o muro. Aqueles que transportavam material faziam o trabalho com uma mão e com a outra seguravam uma arma. Neemias 4:16,17',
-        zipCode: '90650-070',
-        adress: 'R. Plácido de Castro, 245 - Azenha, Porto Alegre - RS, 90650-070',
-        websiteURL: 'https://www.igrejacristamaranata.org.br/',
 
+// ---- Testes 
 
-    }, 'x.x', function (err, user) {
-        if (err) {
-            console.log(err);
-            console.log('Ops! Algo deu errado, tente novamente mais tarde.')
-        } else {
-            console.log('Usuário cadastrado com sucesso!' + user)
-        }
-    });
+async function getUsers(valorProcurado) {
+    const Items = await User.find({ state: valorProcurado });
+    return Items;
 }
 
+async function getSeminars() {
+    const Items = await Seminar.find();
+    return Items;
+}
 
+async function getTheSeminar(identificador) {
+    const Item = await Seminar.findById(identificador)
+}
+
+app.get('/allUsers', (req, res) => {
+    getUsers('RS').then(function (FoundItems) {
+
+        res.send(FoundItems)
+
+    });
+})
+
+app.get('/seminars', (req, res) => {
+    getSeminars().then(function (FoundItems) {
+
+        res.send(FoundItems)
+
+    });
+})
+app.get('/theSeminar', (req, res) => {
+    getSeminars(req.params.identificador).then(function (FoundItems) {
+        console.log(`${req.query.identificador}-${FoundItems}`)
+        res.send(FoundItems)
+
+    });
+})
 
 // ---- Routes
 app.get('/teste', (req, res) => {
@@ -107,4 +123,61 @@ app.get('/teste', (req, res) => {
 
 app.listen(process.env.PORT || 4000, () => {
     console.log("O servidor está conectado");
+});
+ */
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+
+const eventRoutes = require('./routes/events');
+const saleRoutes = require('./routes/sales');
+const bookRoutes = require('./routes/books');
+
+const app = express();
+
+// ---- Cors Connections
+app.set("trust proxy", 1);
+
+app.use(
+    cors({
+        origin: process.env.FRONT_URL,
+        credentials: true,
+    })
+);
+
+// ---- Several Configs
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+app.use(
+    bodyParser.urlencoded({
+        extended: true,
+    })
+);
+
+
+// Conexão com o MongoDB
+mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('Connected to MongoDB');
+}).catch(error => {
+    console.error('Error connecting to MongoDB:', error.message);
+});
+
+// Middleware
+app.use(bodyParser.json());
+
+// Rotas
+app.use('/api/event', eventRoutes);
+app.use('/api/sale', saleRoutes);
+app.use('/api/book', bookRoutes);
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

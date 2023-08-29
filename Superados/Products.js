@@ -3,8 +3,15 @@ var mongoose = require("mongoose");
 
 //vamos criar um schema de collection, chamada 'ProductSchema'
 const ProductSchema = new mongoose.Schema({
+    maanaim: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
     cost: { type: Number },
     price: { type: Number },
+    group:{ type: String, },
+    subGroup:{ type: String, },
+    name:{ type: String, },
     status: {
         type: String,
         required: true,

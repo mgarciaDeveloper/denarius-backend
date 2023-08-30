@@ -13,6 +13,7 @@ const saleSchema = new mongoose.Schema({
         required: true,
     },
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', },
     eventId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Event',
